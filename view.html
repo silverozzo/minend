@@ -1,0 +1,16 @@
+<script type='text/javascript' src='jquery.js'></script>
+
+<script type='text/javascript'>
+	function start_click()
+	{
+		$.ajax({
+			url      : 'http://localhost:8888/',
+			dataType : 'json',
+			success  : function(data, textStatus) {
+					alert(data);
+				}
+		});
+	}
+</script>
+
+<input type='button' value='start' onclick='start_click()' />
