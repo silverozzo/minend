@@ -6,27 +6,48 @@ class Cell():
 	opened = False
 	neibs  = []
 	point  = 0
+	coords = ()
 	
-	def __init__(self):
+	def __init__(self, row, col):
 		self.mined  = False
 		self.opened = False
 		self.neibs  = []
 		self.point  = 0
+		self.coords = (row, col)
 	
 	def check_point(self):
 		if self.mined:
+			self.point = 9
 			return
 		
 		for neib in self.neibs:
 			if neib.mined:
 				self.point += 1
+	
+	def open(self, stack=[]):
+		if self.opened:
+			return stack
+		
+		if self.point > 0:
+			self.opened = True
+			print('open ' + str(self.coords))
+			stack.append((self.coords, self.point))
+			return stack
+		
+		if self.point == 0:
+			self.opened = True
+			stack.append((self.coords, self.point))
+			for neib in self.neibs:
+				print('neib ' + str(neib.coords))
+				stack = neib.open(stack)
+			return stack
 
 
 class Field():
 	cells = []
 	
 	def __init__(self, rows, cols, mines):
-		self.cells = [[Cell() for x in range(cols)] for row in range(rows)]
+		self.cells = [[Cell(row, col) for col in range(cols)] for row in range(rows)]
 		self.init_mines(mines)
 		self.init_neibs()
 	
@@ -64,5 +85,16 @@ class Field():
 				self.cells[row][col].check_point()
 	
 	def get_state(self):
-		state = [[cell.point for cell in row] for row in self.cells]
+		state = [[cell.opened for cell in row] for row in self.cells]
 		return state
+	
+	def open(self, row, col):
+		stack  = self.cells[row][col].open()
+		result = {}
+		
+		print('stack ' + str(stack))
+		
+		for item in stack:
+			result[str(item[0][0]) + '-' + str(item[0][1])] = item[1]
+		
+		return result

@@ -5,6 +5,8 @@ import tornado.web
 from field import Field
 
 
+field = None
+
 class MainHandler(tornado.web.RequestHandler):
 	def get(self):
 		self.render('view.html')
@@ -12,15 +14,26 @@ class MainHandler(tornado.web.RequestHandler):
 
 class StarterHandler(tornado.web.RequestHandler):
 	def get(self):
+		global field
 		field = Field(3, 3, 2)
+		print('---------new')
 		self.set_header('Content-Type', 'application/json')
 		self.write(json.dumps(field.get_state()))
 
 
+class OpeningHandler(tornado.web.RequestHandler):
+	def get(self, row, col):
+		global field
+		result = field.open(int(row), int(col))
+		self.set_header('Content-Type', 'application/json')
+		self.write(json.dumps(result))
+
+
 def make_app():
 	return tornado.web.Application([
-		(r'/',      MainHandler),
-		(r'/start', StarterHandler),
+		(r'/',               MainHandler),
+		(r'/start',          StarterHandler),
+		(r'/open/(.*)/(.*)', OpeningHandler),
 	])
 
 if __name__ == '__main__':
