@@ -4,6 +4,7 @@ import random
 class Cell():
 	mined  = False
 	opened = False
+	marked = False
 	neibs  = []
 	point  = 0
 	coords = ()
@@ -11,6 +12,7 @@ class Cell():
 	def __init__(self, row, col):
 		self.mined  = False
 		self.opened = False
+		self.marked = False
 		self.neibs  = []
 		self.point  = 0
 		self.coords = (row, col)
@@ -28,6 +30,9 @@ class Cell():
 		if self.opened:
 			return stack
 		
+		if self.marked:
+			return stack
+		
 		if self.point > 0:
 			self.opened = True
 			print('open ' + str(self.coords))
@@ -41,6 +46,10 @@ class Cell():
 				print('neib ' + str(neib.coords))
 				stack = neib.open(stack)
 			return stack
+	
+	def mark(self):
+		self.marked = not self.marked
+		return self.marked
 
 
 class Field():
@@ -89,12 +98,14 @@ class Field():
 		return state
 	
 	def open(self, row, col):
-		stack  = self.cells[row][col].open()
+		stack  = self.cells[row][col].open([])
 		result = {}
-		
 		print('stack ' + str(stack))
 		
 		for item in stack:
 			result[str(item[0][0]) + '-' + str(item[0][1])] = item[1]
 		
 		return result
+
+	def mark(self, row, col):
+		return self.cells[row][col].mark()

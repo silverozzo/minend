@@ -24,7 +24,21 @@ class StarterHandler(tornado.web.RequestHandler):
 class OpeningHandler(tornado.web.RequestHandler):
 	def get(self, row, col):
 		global field
-		result = field.open(int(row), int(col))
+		result = {
+			'state' : True,
+			'stack' : field.open(int(row), int(col)),
+		}
+		self.set_header('Content-Type', 'application/json')
+		self.write(json.dumps(result))
+
+
+class MarkingHandler(tornado.web.RequestHandler):
+	def get(self, row, col):
+		global field
+		result = {
+			'state'  : True,
+			'result' : field.mark(int(row), int(col)),
+		}
 		self.set_header('Content-Type', 'application/json')
 		self.write(json.dumps(result))
 
@@ -34,6 +48,7 @@ def make_app():
 		(r'/',               MainHandler),
 		(r'/start',          StarterHandler),
 		(r'/open/(.*)/(.*)', OpeningHandler),
+		(r'/mark/(.*)/(.*)', MarkingHandler),
 	])
 
 if __name__ == '__main__':

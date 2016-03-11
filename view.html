@@ -19,7 +19,11 @@ return b?(parseFloat(Sa(a,"marginLeft"))||(n.contains(a.ownerDocument,a)?a.getBo
 						data.forEach(function(item, i, data) {
 								var row = table.append('<tr id="row-' + i + '" height="25px"></tr>');
 								item.forEach(function(cell, j, item) {
-										$('#row-' + i).append('<td id="cell-' + i + '-' + j + '" width="27px" align="center"><input type="button" value="&nbsp;" onclick="open_click(' + i + ',' + j + ')"/></td>');
+										$('#row-' + i).append('<td id="cell-' + i + '-' + j + '" width="27px" align="center">' +
+											'<input type="button" value="&nbsp;" id="but-' + i + '-' + j + '" ' +
+											'onclick="open_click(' + i + ',' + j + ')" ' +
+											'oncontextmenu="return mark_click(' + i + ',' + j + ')" ' +
+											'/></td>');
 									});
 							});
 					}
@@ -32,11 +36,31 @@ return b?(parseFloat(Sa(a,"marginLeft"))||(n.contains(a.ownerDocument,a)?a.getBo
 				url      : 'http://localhost:8888/open/' + row + '/' + col,
 				dataType : 'json',
 				success  : function(data, textStatus) {
-						for (var key in data) {
-							$('#cell-' + key).text(data[key]);
+						for (var key in data['stack']) {
+							var text = data['stack'][key];
+							if (text == '0')
+								text = ' ';
+							
+							$('#cell-' + key).text(text);
 						}
 					}
-			})
+			});
+	}
+
+	function mark_click(row, col)
+	{
+		$.ajax({
+				url      : 'http://localhost:8888/mark/' + row + '/' + col,
+				dataType : 'json',
+				success  : function(data, textStatus) {
+						if (data['result'])
+							$('#but-' + row + '-' + col).value = '#';
+						else
+							$('#but-' + row + '-' + col).value = '&nbsp;';
+					}
+			});
+
+		return false;
 	}
 </script>
 
