@@ -19,7 +19,6 @@ class Cell():
 	
 	def check_point(self):
 		if self.mined:
-			self.point = 9
 			return
 		
 		for neib in self.neibs:
@@ -35,7 +34,7 @@ class Cell():
 		
 		if self.point > 0:
 			self.opened = True
-			print('open ' + str(self.coords))
+			#print('open ' + str(self.coords))
 			stack.append((self.coords, self.point))
 			return stack
 		
@@ -43,22 +42,30 @@ class Cell():
 			self.opened = True
 			stack.append((self.coords, self.point))
 			for neib in self.neibs:
-				print('neib ' + str(neib.coords))
+				#print('neib ' + str(neib.coords))
 				stack = neib.open(stack)
 			return stack
 	
 	def mark(self):
 		self.marked = not self.marked
+		#print('mark: ' + str(self.coords) + ' ' + str(self.marked))
 		return self.marked
 
 
 class Field():
-	cells = []
+	cells    = []
+	rest     = 0
+	finished = False
+	loosed   = False
 	
 	def __init__(self, rows, cols, mines):
 		self.cells = [[Cell(row, col) for col in range(cols)] for row in range(rows)]
 		self.init_mines(mines)
 		self.init_neibs()
+		
+		self.rest     = mines
+		self.finished = False
+		self.loosed   = False
 	
 	def init_mines(self, mines):
 		counter = 0
@@ -98,9 +105,14 @@ class Field():
 		return state
 	
 	def open(self, row, col):
+		if self.finished:
+			return {}
+		
 		stack  = self.cells[row][col].open([])
+		self.check_finished()
+		self.check_loose()
+		
 		result = {}
-		print('stack ' + str(stack))
 		
 		for item in stack:
 			result[str(item[0][0]) + '-' + str(item[0][1])] = item[1]
@@ -108,4 +120,35 @@ class Field():
 		return result
 
 	def mark(self, row, col):
-		return self.cells[row][col].mark()
+		if self.finished:
+			return self.cells[row][col].marked
+		
+		result = self.cells[row][col].mark()
+		if result:
+			self.rest -= 1
+		else:
+			self.rest += 1
+		
+		return result
+	
+	def check_finished(self):
+		if self.finished:
+			return True
+		
+		for row in self.cells:
+			for cell in row:
+				if not cell.mined and not cell.opened:
+					return False
+		
+		self.finished = True
+		self.loosed   = False
+		return True
+	
+	def check_loose(self):
+		for row in self.cells:
+			for cell in row:
+				if cell.mined and cell.opened:
+					self.finished = True
+					self.loosed   = True
+					return True
+		return False

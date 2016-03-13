@@ -6,6 +6,7 @@ from field import Field
 
 
 field = None
+bonus = 0
 
 class MainHandler(tornado.web.RequestHandler):
 	def get(self):
@@ -15,19 +16,44 @@ class MainHandler(tornado.web.RequestHandler):
 class StarterHandler(tornado.web.RequestHandler):
 	def get(self):
 		global field
-		field = Field(3, 3, 2)
+		global bonus
+		
+		field = Field(10, 10, 9 + bonus)
 		print('---------new')
+		
+		result = {
+			'state' : field.get_state(),
+			'rest'  : field.rest
+		}
+		
 		self.set_header('Content-Type', 'application/json')
-		self.write(json.dumps(field.get_state()))
+		self.write(json.dumps(result))
 
 
 class OpeningHandler(tornado.web.RequestHandler):
 	def get(self, row, col):
 		global field
+		global bonus
+		
+		can_bonus = False
+		if not field.finished:
+			can_bonus = True
+		
 		result = {
-			'state' : True,
-			'stack' : field.open(int(row), int(col)),
+			'state'    : True,
+			'stack'    : field.open(int(row), int(col)),
+			'finished' : field.finished,
+			'loose'    : field.loosed,
 		}
+		
+		if can_bonus and field.finished and not field.loosed:
+			bonus += 1
+			print('bonus incremented (' + str(bonus) + ')')
+		
+		if can_bonus and field.finished and field.loosed:
+			bonus = 0
+			print('bonus reset (' + str(bonus) + ')')
+		
 		self.set_header('Content-Type', 'application/json')
 		self.write(json.dumps(result))
 
@@ -35,9 +61,12 @@ class OpeningHandler(tornado.web.RequestHandler):
 class MarkingHandler(tornado.web.RequestHandler):
 	def get(self, row, col):
 		global field
+		marked = field.mark(int(row), int(col))
+		
 		result = {
 			'state'  : True,
-			'result' : field.mark(int(row), int(col)),
+			'rest'   : field.rest,
+			'result' : marked,
 		}
 		self.set_header('Content-Type', 'application/json')
 		self.write(json.dumps(result))

@@ -15,17 +15,22 @@ return b?(parseFloat(Sa(a,"marginLeft"))||(n.contains(a.ownerDocument,a)?a.getBo
 				success  : function(data, textStatus) {
 						var table = $('#field')
 						$('#field tr').remove();
-
-						data.forEach(function(item, i, data) {
+						
+						var state = data['state'];
+						
+						state.forEach(function(item, i, state) {
 								var row = table.append('<tr id="row-' + i + '" height="25px"></tr>');
 								item.forEach(function(cell, j, item) {
 										$('#row-' + i).append('<td id="cell-' + i + '-' + j + '" width="27px" align="center">' +
-											'<input type="button" value="&nbsp;" id="but-' + i + '-' + j + '" ' +
+											'<input type="button" value=" " id="but-' + i + '-' + j + '" ' +
 											'onclick="open_click(' + i + ',' + j + ')" ' +
 											'oncontextmenu="return mark_click(' + i + ',' + j + ')" ' +
 											'/></td>');
 									});
 							});
+						
+						$('#rest_counter').text(data['rest']);
+						$('#finish_notify').text('')
 					}
 			});
 	}
@@ -43,6 +48,14 @@ return b?(parseFloat(Sa(a,"marginLeft"))||(n.contains(a.ownerDocument,a)?a.getBo
 							
 							$('#cell-' + key).text(text);
 						}
+						
+						if (data['finished'])
+							if (data['loose'])
+								$('#finish_notify').text('looser')
+							else
+								$('#finish_notify').text('winner')
+						else
+							$('#finish_notify').text('')
 					}
 			});
 	}
@@ -54,9 +67,11 @@ return b?(parseFloat(Sa(a,"marginLeft"))||(n.contains(a.ownerDocument,a)?a.getBo
 				dataType : 'json',
 				success  : function(data, textStatus) {
 						if (data['result'])
-							$('#but-' + row + '-' + col).value = '#';
+							$('#but-' + row + '-' + col).css('background-color', 'red');
 						else
-							$('#but-' + row + '-' + col).value = '&nbsp;';
+							$('#but-' + row + '-' + col).css('background-color', '');
+						
+						$('#rest_counter').text(data['rest']);
 					}
 			});
 
@@ -64,7 +79,15 @@ return b?(parseFloat(Sa(a,"marginLeft"))||(n.contains(a.ownerDocument,a)?a.getBo
 	}
 </script>
 
-<input type='button' value='start' onclick='start_click()' />
-
-<table id='field' cellpadding='0' cellspacing='0'>
+<table>
+	<tr>
+		<td align='left'><input type='button' value='start' onclick='start_click()' /></td>
+		<td id='finish_notify'></td>
+		<td id='rest_counter' align='right'>0</td>
+	</tr>
+	<tr>
+		<td colspan='3'>
+			<table id='field' cellpadding='0' cellspacing='0' />
+		</td>
+	</tr>
 </table>
