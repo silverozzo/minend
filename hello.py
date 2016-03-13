@@ -8,6 +8,7 @@ from field import Field
 field = None
 bonus = 0
 
+
 class MainHandler(tornado.web.RequestHandler):
 	def get(self):
 		self.render('view.html')
@@ -48,11 +49,9 @@ class OpeningHandler(tornado.web.RequestHandler):
 		
 		if can_bonus and field.finished and not field.loosed:
 			bonus += 1
-			print('bonus incremented (' + str(bonus) + ')')
 		
 		if can_bonus and field.finished and field.loosed:
 			bonus = 0
-			print('bonus reset (' + str(bonus) + ')')
 		
 		self.set_header('Content-Type', 'application/json')
 		self.write(json.dumps(result))
@@ -79,6 +78,7 @@ def make_app():
 		(r'/open/(.*)/(.*)', OpeningHandler),
 		(r'/mark/(.*)/(.*)', MarkingHandler),
 	])
+
 
 if __name__ == '__main__':
 	app = make_app()

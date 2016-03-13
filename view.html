@@ -47,6 +47,8 @@ return b?(parseFloat(Sa(a,"marginLeft"))||(n.contains(a.ownerDocument,a)?a.getBo
 								text = ' ';
 							
 							$('#cell-' + key).text(text);
+							if (text == '1')
+								$('#cell-' + key).css('color', 'blue');
 						}
 						
 						if (data['finished'])

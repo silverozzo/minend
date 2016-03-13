@@ -29,12 +29,16 @@ class Cell():
 		if self.opened:
 			return stack
 		
+		if self.mined:
+			self.opened = True
+			stack.append((self.coords, self.point))
+			return stack
+		
 		if self.marked:
 			return stack
 		
 		if self.point > 0:
 			self.opened = True
-			#print('open ' + str(self.coords))
 			stack.append((self.coords, self.point))
 			return stack
 		
@@ -42,13 +46,11 @@ class Cell():
 			self.opened = True
 			stack.append((self.coords, self.point))
 			for neib in self.neibs:
-				#print('neib ' + str(neib.coords))
 				stack = neib.open(stack)
 			return stack
 	
 	def mark(self):
 		self.marked = not self.marked
-		#print('mark: ' + str(self.coords) + ' ' + str(self.marked))
 		return self.marked
 
 
@@ -67,8 +69,14 @@ class Field():
 		self.finished = False
 		self.loosed   = False
 	
-	def init_mines(self, mines):
+	def init_mines(self, mines, line):
 		counter = 0
+		border  = 0
+		if line:
+			border = 1
+			for item in line:
+				pass
+		
 		while counter < mines:
 			row = random.randint(0, len(self.cells) - 1)
 			col = random.randint(0, len(self.cells[0]) - 1)
@@ -108,7 +116,7 @@ class Field():
 		if self.finished:
 			return {}
 		
-		stack  = self.cells[row][col].open([])
+		stack = self.cells[row][col].open([])
 		self.check_finished()
 		self.check_loose()
 		
@@ -118,7 +126,7 @@ class Field():
 			result[str(item[0][0]) + '-' + str(item[0][1])] = item[1]
 		
 		return result
-
+	
 	def mark(self, row, col):
 		if self.finished:
 			return self.cells[row][col].marked
@@ -152,3 +160,7 @@ class Field():
 					self.loosed   = True
 					return True
 		return False
+	
+	def get_line_for_next(self):
+		line = [cell.mined for cell in self.cells[-1]]
+		return line
